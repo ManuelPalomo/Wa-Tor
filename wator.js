@@ -2,6 +2,17 @@ const WIDTH = 640;
 const HEIGHT= 480;
 const CELL_SIZE=2;
 
+const CELL = 0;
+const WATER = 1;
+const SHARK = 2;
+const FISH = 3;
+
+const NORTH = 0;
+const EAST = 1;
+const SOUTH = 2;
+const WEST = 3;
+const NO_DIRECTION = 4;
+
 const COLOR_BLUE = "BLUE";
 const COLOR_RED = "RED";
 const COLOR_GREEN = "GREEN";
@@ -39,9 +50,10 @@ class Wator{
     }
 
     _update(){
+        var grid = this.grid;
         this.grid.matrix.map(function(row){
             row.map(function(cell){
-                cell.update();
+                cell.update(grid);
             })
         })
     }
@@ -77,6 +89,16 @@ class Grid{
             }
         }
     }
+
+    getCellContent(x,y){
+        return this.matrix[x][y];
+    }
+
+    changePosition(cell,x,y){
+        matrix[cell.x][cell.y] = new Water(cell.x,cell.y);
+        matrix[x][y] = cell;
+        cell.changePosition(x,y);
+    }
 }
 
 class Cell{
@@ -84,6 +106,8 @@ class Cell{
         this.x = x;
         this.y = y;
         this.color = color;
+        this.type = CELL;
+        
     }
 
     paint(context){
@@ -91,25 +115,89 @@ class Cell{
         context.fillRect(this.x*CELL_SIZE,this.y*CELL_SIZE,CELL_SIZE,CELL_SIZE);
     }
 
-    update(){}
+    changePosition(newX,newY){
+        this.x = newX;
+        this.y = newY;
+    }
+
+    update(grid){}
+
 }
 
 class Water extends Cell{
     constructor(x,y){
         super(x,y,COLOR_BLUE);
+        this.type = WATER;
     }
+
+    update(grid){}
 }
 
 class Fish extends Cell{
     constructor(x,y){
         super(x,y,COLOR_GREEN);
+        this.type = FISH;
     }
+
+    update(grid){
+        this._move(grid);
+    }
+
+    _move(grid){
+        var direction = this._getWhatDirectionToMove(grid);
+        switch(direction){
+            case NORTH:
+                this._moveNorth();
+                break;
+            case EAST:
+                this._moveEast();
+                break;
+            case SOUTH:
+                this._moveSouth();
+                break;
+            case WEST:
+                this._moveWest();
+                break;
+        }
+    }
+
+    _getWhatDirectionToMove(grid){
+        var availableDirections = this._checkAvailableDirections();
+        if(availableDirections.length!=0){
+            var randomIndex = Math.floor(Math.random()*availableDirections.length);
+            return availableDirections[randomIndex];
+        }
+        return NO_DIRECTION;
+    }
+    _checkAvailableDirections(grid){
+        var availableDirections = [];
+        if(this._canMoveNorth(grid)) availableDirections.push(NORTH);
+        if(this._canMoveEast(grid)) availableDirections.push(EAST);
+        if(this._canMoveSouth(grid))availableDirections.push(SOUTH);
+        if(this._canMoveWest(grid))availableDirections.push(WEST);
+        return availableDirections;
+    }
+    
+    _canMoveNorth(grid){}
+
+    _canMoveSouth(grid){}
+
+    _canMoveEast(grid){}
+
+    _canMoveWest(grid){}
+
+    _moveNorth(){}
+    _moveEast(){}
+    _moveSouth(){}
+    _moveWest(){}
 }
 
 class Shark extends Cell{
     constructor(x,y){
         super(x,y,COLOR_RED);
+        this.type = SHARK;
     }
+    update(grid){}
 }
 
 function start(){
