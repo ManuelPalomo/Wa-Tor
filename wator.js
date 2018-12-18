@@ -2,6 +2,10 @@ const WIDTH = 640;
 const HEIGHT= 480;
 const CELL_SIZE=2;
 
+const COLOR_BLUE = "BLUE";
+const COLOR_RED = "RED";
+const COLOR_GREEN = "GREEN";
+
 window.addEventListener('DOMContentLoaded',()=>{
     start();
 })
@@ -41,7 +45,17 @@ class Grid{
         for(var i=0; i<heightCellNumber;i++){
             this.matrix[i] = new Array(widthCellNumber);
             for(var j = 0;j<this.matrix[i].length;j++){
-                this.matrix[i][j] = new Cell(j,i,"RED");
+                
+                var cell = null;
+                var random = Math.floor((Math.random()*3)+1);
+                if(random == 1){
+                    cell = new Water(j,i);
+                }else if(random == 2){
+                    cell = new Fish(j,i);
+                }else{
+                    cell = new Shark(j,i);
+                }
+                this.matrix[i][j] = cell;
             }
         }
     }
@@ -60,6 +74,24 @@ class Cell{
     }
 
     move(){}
+}
+
+class Water extends Cell{
+    constructor(x,y){
+        super(x,y,COLOR_BLUE);
+    }
+}
+
+class Fish extends Cell{
+    constructor(x,y){
+        super(x,y,COLOR_GREEN);
+    }
+}
+
+class Shark extends Cell{
+    constructor(x,y){
+        super(x,y,COLOR_RED);
+    }
 }
 
 function start(){
