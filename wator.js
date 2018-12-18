@@ -17,15 +17,15 @@ class Wator{
         this.canvas.height = HEIGHT;
         this.canvas.width = WIDTH;
         this.context = canvas.getContext("2d");
-        this.initialize();
-        this.paint();
+        this._initialize();
     }
 
-    initialize(){
+    _initialize(){
         this.grid = new Grid();
     }
 
-    paint(){
+    _draw(){
+        this._clear();
         var context = this.context;
         this.grid.matrix.map(function(row){
             row.map(function(cell){
@@ -33,7 +33,25 @@ class Wator{
             })
         })      
     }
-    clear(){
+
+    _clear(){
+        this.context.clearRect(0,0,this.canvas.width,this.canvas.height);
+    }
+
+    _update(){
+        this.grid.matrix.map(function(row){
+            row.map(function(cell){
+                cell.update();
+            })
+        })
+    }
+
+    initializeLoop(){
+        var self = this;
+        setInterval(function(){
+            self._update();
+            self._draw();
+        },1000);
     }
 }
 
@@ -73,7 +91,7 @@ class Cell{
         context.fillRect(this.x*CELL_SIZE,this.y*CELL_SIZE,CELL_SIZE,CELL_SIZE);
     }
 
-    move(){}
+    update(){}
 }
 
 class Water extends Cell{
@@ -96,5 +114,5 @@ class Shark extends Cell{
 
 function start(){
     var wator = new Wator(document.getElementById("canvas"));
-    wator.paint();
+    wator.initializeLoop();
 }
