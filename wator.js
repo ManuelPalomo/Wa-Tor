@@ -1,3 +1,5 @@
+"use strict";
+
 const WIDTH = 640; 
 const HEIGHT= 480;
 const CELL_SIZE=2;
@@ -28,13 +30,8 @@ class Wator{
         this.canvas.height = HEIGHT;
         this.canvas.width = WIDTH;
         this.context = canvas.getContext("2d");
-        this._initialize();
-    }
-
-    _initialize(){
         this.grid = new Grid();
     }
-
     _draw(){
         this._clear();
         var context = this.context;
@@ -72,9 +69,9 @@ class Grid{
         let widthCellNumber = Math.floor(WIDTH/CELL_SIZE);
         let heightCellNumber = Math.floor(HEIGHT/CELL_SIZE);
         this.matrix = [];
-        for(var i=0; i<heightCellNumber;i++){
+        for(var i=0; i<heightCellNumber; i++){
             this.matrix[i] = new Array(widthCellNumber);
-            for(var j = 0;j<this.matrix[i].length;j++){
+            for(var j = 0; j<this.matrix[i].length; j++){
                 
                 var cell = null;
                 var random = Math.floor((Math.random()*3)+1);
@@ -91,7 +88,7 @@ class Grid{
     }
 
     getCellContent(x,y){
-        return this.matrix[x][y];
+            return this.matrix[y][x];
     }
 
     changePosition(cell,x,y){
@@ -138,7 +135,6 @@ class Fish extends Cell{
         super(x,y,COLOR_GREEN);
         this.type = FISH;
     }
-
     update(grid){
         this._move(grid);
     }
@@ -162,8 +158,8 @@ class Fish extends Cell{
     }
 
     _getWhatDirectionToMove(grid){
-        var availableDirections = this._checkAvailableDirections();
-        if(availableDirections.length!=0){
+        var availableDirections = this._checkAvailableDirections(grid);
+        if(availableDirections.length > 0){
             var randomIndex = Math.floor(Math.random()*availableDirections.length);
             return availableDirections[randomIndex];
         }
@@ -174,17 +170,32 @@ class Fish extends Cell{
         if(this._canMoveNorth(grid)) availableDirections.push(NORTH);
         if(this._canMoveEast(grid)) availableDirections.push(EAST);
         if(this._canMoveSouth(grid))availableDirections.push(SOUTH);
-        if(this._canMoveWest(grid))availableDirections.push(WEST);
+        if(this._canMoveWest(grid))availableDirections.push(WEST); 
         return availableDirections;
     }
     
-    _canMoveNorth(grid){}
+    _canMoveNorth(grid){
+        var northCell = null;
+        (this.y -1 < 0 ) ? northCell=grid.getCellContent(this.x,grid.matrix.length-1) : northCell=grid.getCellContent(this.x, this.y - 1); 
+       return northCell.type == WATER;
+    }
 
-    _canMoveSouth(grid){}
+    _canMoveSouth(grid){
+        var southCell = null;
+        (this.y + 1 == grid.matrix.length ) ? southCell = grid.getCellContent(this.x,0): southCell = grid.getCellContent(this.x, this.y + 1);
+        return southCell.type == WATER;
+    }
 
-    _canMoveEast(grid){}
+    _canMoveEast(grid){
+        var eastCell = null;
+        (this.x + 1 == grid.matrix[0].length ) ? eastCell = grid.getCellContent(0,this.y) : eastCell = grid.getCellContent(this.x + 1, this.y);
+        return eastCell.type == WATER;
+    }
 
-    _canMoveWest(grid){}
+    _canMoveWest(grid){
+        var westCell = null;
+        (this.x -1 < 0) ? westCell = grid.getCellContent(grid.matrix[0].length-1,this.y) : westCell = grid.getCellContent(this.x + 1, this.y);
+    }
 
     _moveNorth(){}
     _moveEast(){}
