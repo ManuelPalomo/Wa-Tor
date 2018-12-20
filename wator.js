@@ -4,9 +4,18 @@ const WIDTH = 640;
 const HEIGHT = 480;
 const CELL_SIZE = 8;
 
+const STARTING_SHARKS = 10;
+const STARTING_FISHES = 100;
+
 const SHARK_STARTING_ENERGY = 5;
 const ENERGY_PER_FISH = 3;
 const ENERGY_PER_MOVEMENT = 1;
+
+const CHRONON_FISH_REPRODUCTIVE_CYCLE = 3;
+const CHRONON_SHARK_REPRODUCTIVE_CYCLE = 10;
+
+const FISH_REPRODUCTION_CHANCE = 0.3;
+const SHARK_REPRODUCTION_CHANCE = 0.3;
 
 const CELL = 0;
 const WATER = 1;
@@ -101,8 +110,12 @@ class Grid {
         cell.changePosition(x, y);
     }
 
-    deleteCell(x,y){
-        this.matrix[y][x] = new Water(x, y); 
+    deleteCell(x, y) {
+        this.matrix[y][x] = new Water(x, y);
+    }
+
+    placeCell(cell, x, y) {
+        this.matrix[y][x] = cell;
     }
 }
 
@@ -175,9 +188,15 @@ class Fish extends Cell {
     constructor(x, y) {
         super(x, y, COLOR_GREEN);
         this.type = FISH;
+        this.chrononsSurvived = 0;
     }
     update(grid) {
+        var spawnX = this.x;
+        var spawnY = this.y;
         this._move(grid);
+        this._reproduce(spawnX, spawnY, grid);
+        this.chrononsSurvived++;
+
     }
 
     _getWhatDirectionToMove(grid) {
@@ -220,18 +239,44 @@ class Fish extends Cell {
         (this.x - 1 < 0) ? westCell = grid.getCellContent(grid.matrix[0].length - 1, this.y) : westCell = grid.getCellContent(this.x - 1, this.y);
         return westCell.type == WATER;
     }
+
+    _reproduce(spawnX, spawnY, grid) {
+        if (this.chrononsSurvived == CHRONON_FISH_REPRODUCTIVE_CYCLE) {
+            this.chrononsSurvived = 0;
+            if (Math.random() < FISH_REPRODUCTION_CHANCE) {
+                var newFish = new Fish(spawnX, spawnY);
+                grid.placeCell(newFish, spawnX, spawnY);
+            }
+        }
+    }
 }
 
 class Shark extends Cell {
     constructor(x, y) {
         super(x, y, COLOR_RED);
         this.type = SHARK;
+        this.chrononsSurvived = 0;
         this.energy = SHARK_STARTING_ENERGY;
     }
 
     update(grid) {
+        var spawnX = this.x;
+        var spawnY = this.y;
+
         this._move(grid);
         this._consumeEnergy(grid);
+        this._reproduce(spawnX, spawnY, grid);
+        this.chrononsSurvived++;
+    }
+
+    _reproduce(spawnX, spawnY, grid) {
+        if (this.chrononsSurvived == CHRONON_SHARK_REPRODUCTIVE_CYCLE) {
+            this.chrononsSurvived = 0;
+            if (Math.random() < SHARK_REPRODUCTION_CHANCE) {
+                var newShark = new Shark(spawnX, spawnY);
+                grid.placeCell(newShark, spawnX, spawnY);
+            }
+        }
     }
 
     _getWhatDirectionToMove(grid) {
@@ -252,13 +297,13 @@ class Shark extends Cell {
         this._fillEastContent(grid, availableFishes, availableWaters);
         this._fillWestContent(grid, availableFishes, availableWaters);
 
-        if(availableFishes.length > 0){
+        if (availableFishes.length > 0) {
             this._eatFish();
             return availableFishes;
         }
         return availableWaters;
     }
-    
+
     _fillNorthContent(grid, availableFishes, availableWater) {
         var northCell = null;
         (this.y - 1 < 0) ? northCell = grid.getCellContent(this.x, grid.matrix.length - 1) : northCell = grid.getCellContent(this.x, this.y - 1);
@@ -276,8 +321,8 @@ class Shark extends Cell {
     _fillEastContent(grid, availableFishes, availableWater) {
         var eastCell = null;
         (this.x + 1 == grid.matrix[0].length) ? eastCell = grid.getCellContent(0, this.y) : eastCell = grid.getCellContent(this.x + 1, this.y);
-        if(eastCell.type == FISH) availableFishes.push(EAST);
-        if(eastCell.type == WATER) availableFishes.push(EAST);
+        if (eastCell.type == FISH) availableFishes.push(EAST);
+        if (eastCell.type == WATER) availableFishes.push(EAST);
     }
 
     _fillWestContent(grid, availableFishes, availableWater) {
@@ -287,14 +332,14 @@ class Shark extends Cell {
         if (westCell.type == WATER) availableWater.push(WEST);
     }
 
-    _consumeEnergy(grid){
+    _consumeEnergy(grid) {
         this.energy -= ENERGY_PER_MOVEMENT;
-        if(this.energy == 0){
-            grid.deleteCell(this.x,this.y);
+        if (this.energy == 0) {
+            grid.deleteCell(this.x, this.y);
         }
     }
-    _eatFish(){
-        this.energy += ENERGY_PER_FISH;   
+    _eatFish() {
+        this.energy += ENERGY_PER_FISH;
     }
 
 
