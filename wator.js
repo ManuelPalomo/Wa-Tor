@@ -4,19 +4,18 @@ const WIDTH = 640;
 const HEIGHT = 480;
 const CELL_SIZE = 8;
 
-const STARTING_SHARKS = 10;
-const STARTING_FISHES = 100;
+const STARTING_SHARKS = 100;
+const STARTING_FISHES = 500;
 
 const SHARK_STARTING_ENERGY = 5;
 const ENERGY_PER_FISH = 3;
 const ENERGY_PER_MOVEMENT = 1;
 
 const CHRONON_FISH_REPRODUCTIVE_CYCLE = 3;
-const CHRONON_SHARK_REPRODUCTIVE_CYCLE = 10;
+const CHRONON_SHARK_REPRODUCTIVE_CYCLE = 6;
 
 const FISH_REPRODUCTION_CHANCE = 0.3;
 const SHARK_REPRODUCTION_CHANCE = 0.3;
-
 const CELL = 0;
 const WATER = 1;
 const SHARK = 2;
@@ -82,18 +81,35 @@ class Grid {
         let widthCellNumber = Math.floor(WIDTH / CELL_SIZE);
         let heightCellNumber = Math.floor(HEIGHT / CELL_SIZE);
         this.matrix = [];
+
+        this.fishCount = 0;
+        this.sharkCount = 0;
+        this.waterCount = 0;
+
         for (var i = 0; i < heightCellNumber; i++) {
             this.matrix[i] = new Array(widthCellNumber);
             for (var j = 0; j < this.matrix[i].length; j++) {
-
                 var cell = null;
                 var random = Math.floor((Math.random() * 3) + 1);
                 if (random == 1) {
                     cell = new Water(j, i);
+                    this.waterCount++;
                 } else if (random == 2) {
-                    cell = new Fish(j, i);
+                    if (this.fishCount < STARTING_FISHES) {
+                        cell = new Fish(j, i);
+                        this.fishCount++;
+                    }else{
+                        cell = new Water(j, i);
+                        this.waterCount++; 
+                    }
                 } else {
-                    cell = new Shark(j, i);
+                    if (this.sharkCount < STARTING_SHARKS) {
+                        cell = new Shark(j, i);
+                        this.sharkCount++;
+                    }else{
+                        cell = new Water(j, i);
+                        this.waterCount++;  
+                    }
                 }
                 this.matrix[i][j] = cell;
             }
