@@ -16,7 +16,7 @@ const WEST = 3;
 const NO_DIRECTION = 4;
 
 const COLOR_BLUE = "BLUE";
-const COLOR_RED = "RED";
+const COLOR_RED = "RED"
 const COLOR_GREEN = "GREEN";
 
 window.addEventListener('DOMContentLoaded',()=>{
@@ -60,7 +60,7 @@ class Wator{
         setInterval(function(){
             self._update();
             self._draw();
-        },1000);
+        },500);
     }
 }
 
@@ -88,12 +88,12 @@ class Grid{
     }
 
     getCellContent(x,y){
-            return this.matrix[y][x];
+        return this.matrix[y][x];
     }
 
     changePosition(cell,x,y){
-        matrix[cell.x][cell.y] = new Water(cell.x,cell.y);
-        matrix[x][y] = cell;
+        this.matrix[cell.y][cell.x] = new Water(cell.x,cell.y);
+        this.matrix[y][x] = cell;
         cell.changePosition(x,y);
     }
 }
@@ -143,16 +143,16 @@ class Fish extends Cell{
         var direction = this._getWhatDirectionToMove(grid);
         switch(direction){
             case NORTH:
-                this._moveNorth();
+                this._moveNorth(grid);
                 break;
             case EAST:
-                this._moveEast();
+                this._moveEast(grid);
                 break;
             case SOUTH:
-                this._moveSouth();
+                this._moveSouth(grid);
                 break;
             case WEST:
-                this._moveWest();
+                this._moveWest(grid);
                 break;
         }
     }
@@ -176,31 +176,40 @@ class Fish extends Cell{
     
     _canMoveNorth(grid){
         var northCell = null;
-        (this.y -1 < 0 ) ? northCell=grid.getCellContent(this.x,grid.matrix.length-1) : northCell=grid.getCellContent(this.x, this.y - 1); 
-       return northCell.type == WATER;
+        (this.y -1 < 0 ) ? northCell=grid.getCellContent(this.x,grid.matrix.length - 1) : northCell=grid.getCellContent(this.x, this.y - 1); 
+        return northCell.type == WATER;
     }
 
     _canMoveSouth(grid){
         var southCell = null;
-        (this.y + 1 == grid.matrix.length ) ? southCell = grid.getCellContent(this.x,0): southCell = grid.getCellContent(this.x, this.y + 1);
+        (this.y + 1 == grid.matrix.length ) ? southCell = grid.getCellContent(this.x, 0) : southCell = grid.getCellContent(this.x, this.y + 1);
         return southCell.type == WATER;
     }
 
     _canMoveEast(grid){
         var eastCell = null;
-        (this.x + 1 == grid.matrix[0].length ) ? eastCell = grid.getCellContent(0,this.y) : eastCell = grid.getCellContent(this.x + 1, this.y);
+        (this.x + 1 == grid.matrix[0].length ) ? eastCell = grid.getCellContent(0, this.y) : eastCell = grid.getCellContent(this.x + 1, this.y);
         return eastCell.type == WATER;
     }
 
     _canMoveWest(grid){
         var westCell = null;
-        (this.x -1 < 0) ? westCell = grid.getCellContent(grid.matrix[0].length-1,this.y) : westCell = grid.getCellContent(this.x + 1, this.y);
+        (this.x -1 < 0) ? westCell = grid.getCellContent(grid.matrix[0].length - 1, this.y) : westCell = grid.getCellContent(this.x - 1, this.y);
+        return westCell.type == WATER;
     }
 
-    _moveNorth(){}
-    _moveEast(){}
-    _moveSouth(){}
-    _moveWest(){}
+    _moveNorth(grid){
+        (this.y - 1 < 0) ? grid.changePosition(this, this.x,grid.matrix.length - 1) : grid.changePosition(this, this.x,this.y - 1);
+    }
+    _moveSouth(grid){
+        (this.y + 1 == grid.matrix.length ) ?  grid.changePosition(this, this.x, 0) : grid.changePosition(this, this.x, this.y + 1); 
+    }
+    _moveEast(grid){
+        (this.x + 1 == grid.matrix[0].length ) ? grid.changePosition(this, this, 0, this.y) : grid.changePosition(this, this.x + 1, this.y); 
+    }
+    _moveWest(grid){
+        (this.x -1 < 0) ? grid.changePosition(this, grid.matrix[0].length-1, this.y) : grid.changePosition(this, this.x + -1, this.y); 
+    }
 }
 
 class Shark extends Cell{
